@@ -1,0 +1,42 @@
+#cloud-config
+hostname: test-vm
+
+network:
+  version: 2
+  ethernets:
+    enp0s1:
+      dhcp4: false
+      addresses:
+        - 192.168.64.10/24
+      gateway4: 192.168.64.1
+      nameservers:
+        addresses: [8.8.8.8, 192.168.64.1]
+
+users:
+  - name: edmund 
+    groups: sudo, docker
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP9wg8Ukv68PpQgG/fBEwALQDCr8hghn6oZfmLM5ed/T edmund@megatron.local 
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - htop
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+
+runcmd:
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io
+  - usermod -aG docker test-user
+  - systemctl enable docker
+  - systemctl start docker
+

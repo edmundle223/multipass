@@ -1,0 +1,9 @@
+#cloud-config
+hostname: test-vm
+users:
+  - name: edmund
+    ssh-authorized-keys:
+      - ssh-rsa AAA...
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    shell: /bin/bash
+
